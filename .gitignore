@@ -1,0 +1,22 @@
+# Daten
+*.csv
+*.db
+*.zip
+
+# Python Cache
+__pycache__/
+*.pyc
+*.pyo
+.ipynb_checkpoints/
+
+# Lock-Dateien
+*.lock
+.~lock*
+
+# Anaconda/Jupyter
+.env
+*.egg-info/
+
+# OS
+.DS_Store
+Thumbs.db
