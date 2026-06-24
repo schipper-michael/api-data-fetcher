@@ -83,11 +83,9 @@ indicators_url2 = {
 
 def url2_request (code, spaltenname, dim): #depending on database, dim may be not necessary
 
-   url = (
-        f"https://ghoapi.azureedge.net/api/{code}" 
-        
-        f"?format=json&date=2000:2021&per_page=5000"
-    )
+   url = (f"https://ghoapi.azureedge.net/api/{code}"
+          f"?$filter=date(TimeDimensionBegin) ge 2000-01-01" 
+          f"and date(TimeDimensionBegin) lt 2022-01-01") #kann sein das code für zeitspanne anders geschrieben werden muss
 
     response = requests.get(url)
 
