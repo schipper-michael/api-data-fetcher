@@ -10,8 +10,9 @@ indicators_url1 = {
     "SH.H2O.BASW.ZS":   "zugang_sauberes_wasser",
     "SP.DYN.CBRT.IN":   "geburtenrate",
     "EN.GHG.CO2.PC.CE.AR5":   "co2_pro_kopf",
-    "AG.LND.TOTL.K2":   "landflaeche_km2"
-}
+    "AG.LND.TOTL.K2":   "landflaeche_km2",
+    "SP.POP.TOTL": "population_total"
+    }
 def url1_request (code, spaltenname):  #depending on database, viarble "dimension" may be necessary to add
     
     url = (
