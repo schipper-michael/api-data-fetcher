@@ -1,17 +1,18 @@
 import requests
 import pandas as pd
+import csv
 
 
 indicators_url1 = {
     "NY.GDP.PCAP.CD":   "bip_pro_kopf",
-    "SP.DYN.IMRT.IN":   "saeulingssterblichkeit",
+    "SP.DYN.IMRT.IN":   "saeuglingssterblichkeit",
     "SH.XPD.CHEX.GD.ZS": "gesundheitsausgaben_pct_bip",
     "SH.H2O.BASW.ZS":   "zugang_sauberes_wasser",
     "SP.DYN.CBRT.IN":   "geburtenrate",
-    "EN.ATM.CO2E.PC":   "co2_pro_kopf",
-    "AG.LND.TOTL.K2":   "landflaeche_km2",
+    "EN.GHG.CO2.PC.CE.AR5":   "co2_pro_kopf",
+    "AG.LND.TOTL.K2":   "landflaeche_km2"
 }
-def url1_request (code, spaltenname, dim): #depending on database, dim may be not necessary
+def url1_request (code, spaltenname):  #depending on database, viarble "dimension" may be necessary to add
     
     url = (
         f"https://api.worldbank.org/v2/country/all"
@@ -25,21 +26,26 @@ def url1_request (code, spaltenname, dim): #depending on database, dim may be no
         print(f"Fehler bei url2 {code}: Status {response.status_code}")
         return None
 
-    data_url1 = response.json()
+    data_url1 = response.json() # weltbank gibt Liste zurück 
 
+    """
+    print(type(data_url1))
+    print(len(data_url1))
+    print(data_url1)
+    """
     # data_url1[0] = Metadaten, data_url1[1] = Messwerte
     if not data_url1[1]:
         print(f"Keine Daten für url1 {code}")
         return None
 
-    df = pd.DataFrame(data_url1[1])
+    df_url1 = pd.DataFrame(data_url1[1])
 
     df_url1 = (
         df_url1[["countryiso3code", "date", "value"]]
         .rename(columns={
             "countryiso3code": "country_code",
             "date": "year",
-            "value": spaltenname,
+            "value": spaltenname
         })
     )
 
@@ -51,41 +57,37 @@ def url1_request (code, spaltenname, dim): #depending on database, dim may be no
     return df_url1
 
 
-df_worldb = None
+df_url1 = None
 
 for code, spaltenname in indicators_url1.items():
     print(f"Abruf: {spaltenname} ...")
-    df_neu = url1_request(code, spaltenname)
+    df_url1_new = url1_request(code, spaltenname)
 
-    if df_neu is None:
+    if df_url1_new is None:
         continue
 
-    if df_worldb is None:
-        df_worldb = df_neu
+    if df_url1 is None:
+        df_url1 = df_url1_new
     else:
-        df_worldb = df_worldb.merge(
-            df_neu,
+        df_url1 = df_url1.merge(
+            df_url1_new,
             on=["country_code", "year"],
             how="outer"
         )
 
-print(f"\nurl1-Datensatz: {df_worldb.shape}")
-print(df_worldb.head())
+print(f"\nurl1-Datensatz: {df_url1.shape}")
+print(df_url1.head())
 
-#---------------------------------------------------
+###---------------------------------------------------
 
 indicators_url2 = {
     "WHOSIS_000001":"life_expectancy_at_birth"}
 
 
+def url2_request (code, spaltenname): #depending on database, viarble "dimension" may be necessary to add
 
-
-
-def url2_request (code, spaltenname, dim): #depending on database, dim may be not necessary
-
-   url = (f"https://ghoapi.azureedge.net/api/{code}"
-          f"?$filter=date(TimeDimensionBegin) ge 2000-01-01" 
-          f"and date(TimeDimensionBegin) lt 2022-01-01") #kann sein das code für zeitspanne anders geschrieben werden muss
+    url = (f"https://ghoapi.azureedge.net/api/{code}"
+           f"?$filter=TimeDim ge 2000 and TimeDim le 2021") #kann sein das code für zeitspanne anders geschrieben werden muss
 
     response = requests.get(url)
 
@@ -93,96 +95,77 @@ def url2_request (code, spaltenname, dim): #depending on database, dim may be no
         print(f"Fehler bei {code}: Status {response.status_code}")
         return None
 
-    data_url1 = response.json()
+    data_url2 = response.json() #WHO gibt Dictionary zurück
 
-    # data_url1[0] = Metadaten, data_url1[1] = Messwerte
-    if not data_url1[1]:
+    # data_url2[0] = Metadaten, data_url2[1] = Messwerte
+    if not data_url2["value"]:
         print(f"Keine Daten für {code}")
         return None
 
-    df = pd.DataFrame(data_url1[1])
+    df_url2 = pd.DataFrame(data_url2["value"])
 
-    df_url1 = (
-        df_url1[["countryiso3code", "date", "value"]]
+    df_url2 = (
+        df_url2[["SpatialDim", "TimeDim", "NumericValue"]]
         .rename(columns={
-            "countryiso3code": "country_code",
-            "date":            "year",
-            "value":           spaltenname,
+            "SpatialDim":   "country_code",
+            "TimeDim":      "year",
+            "NumericValue": spaltenname
         })
     )
 
-    df_url1["year"] = df_url1["year"].astype(int)
+    df_url2["year"] = df_url2["year"].astype(int)
 
     # Leere Ländercodes entfernen (ohne ISO-3-Code)
-    df_url1 = df_url1[df_url1["country_code"] != ""]
+    df_url2 = df_url2[df_url2["country_code"] != ""]
 
-    return df_url1
+    return df_url2
 
-# API WHO  WHOSIS_000002 
 
-df_worldb = None
+df_url2 = None
 
 for code, spaltenname in indicators_url2.items():
     print(f"Abruf: {spaltenname} ...")
-    df_neu = url2_request(code, spaltenname)
+    df_url2_new = url2_request(code, spaltenname)
 
-    if df_neu is None:
+    if df_url2_new is None:
         continue
 
-    if df_worldb is None:
-        df_worldb = df_neu
+    if df_url2 is None:
+        df_url2 = df_url2_new
     else:
-        df_worldb = df_worldb.merge(
-            df_neu,
+        df_url2 = df_url2.merge(
+            df_url2_new,
             on=["country_code", "year"],
             how="outer"
         )
 
-print(f"\nurl2-Datensatz: {df_worldb.shape}")
-print(df_worldb.head())
+print(f"\nurl2-Datensatz: {df_url2.shape}")
+print(df_url2.head())
 
 
 #---------------------------------------------------
+# merge und export in csv
 
-
-"""
-df_who = pd.read_csv("data_life-expectancy-at-birth.csv")
-
-# Nur Gesamtwert (beide Geschlechter)
-df_who = df_who[df_who["Dim1"] == "Both sexes"]
-
-# Relevante Spalten auswählen und umbenennen
-df_who = (
-    df_who[["SpatialDimValueCode", "Period", "Value"]]
-    .rename(columns={
-        "SpatialDimValueCode": "country_code",
-        "Period":              "year",
-        "Value":               "lebenserwartung",
-    })
-)
-
-df_who["year"] = df_who["year"].astype(int)
-
-print(f"\nWHO-Datensatz: {df_who.shape}")
-print(df_who.head())"""
 
 
 # WHO + Weltbank 
-df = df_who.merge(
-    df_wb,
+df_merged = df_url2.merge(
+    df_url1,
     on=["country_code", "year"],
     how="left"
 )
 
-print(f"\nFinaler Datensatz: {df.shape}")
-print(df.head())
+print(f"\nFinaler Datensatz: {df_merged.shape}")
+print(df_merged.head())
 
 
 # Fehlende Werte pro Spalte 
 print("\nFehlende Werte pro Feature:")
 print(
-    df.isnull()
+    df_merged.isnull()
     .sum()
     .sort_values(ascending=False)
     .to_string()
 )
+
+df_merged.to_csv("output.csv", index="false")
