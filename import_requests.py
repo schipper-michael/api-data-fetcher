@@ -4,15 +4,14 @@ import csv
 
 
 indicators_url1 = {
-    "NY.GDP.PCAP.CD":   "bip_pro_kopf",
-    "SP.DYN.IMRT.IN":   "saeuglingssterblichkeit",
-    "SH.XPD.CHEX.GD.ZS": "gesundheitsausgaben_pct_bip",
-    "SH.H2O.BASW.ZS":   "zugang_sauberes_wasser",
-    "SP.DYN.CBRT.IN":   "geburtenrate",
-    "EN.GHG.CO2.PC.CE.AR5":   "co2_pro_kopf",
-    "AG.LND.TOTL.K2":   "landflaeche_km2",
-    "SP.POP.TOTL": "population_total"
-    }
+    "NY.GDP.PCAP.CD":   "GDP_per_capita",
+    "SP.DYN.IMRT.IN":   "Mortality_rate_infant_(per_1000_live_births)",
+    "SH.XPD.CHEX.GD.ZS": "Current_health_expenditure_(pct_of_GDP)",
+    "SH.H2O.BASW.ZS":   "access_basic_drinking_water_(pct_population)",
+    "SP.DYN.CBRT.IN":   "Birth_rate_(per 1000_people) ",
+    "EN.GHG.CO2.PC.CE.AR5":   "t_CO2e_per_capita)",
+    "AG.LND.TOTL.K2":   "land_area_km2"
+}
 def url1_request (code, spaltenname):  #depending on database, viarble "dimension" may be necessary to add
     
     url = (
