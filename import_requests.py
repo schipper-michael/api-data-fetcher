@@ -10,6 +10,7 @@ indicators_url1 = {
     "SH.H2O.BASW.ZS":   "access_basic_drinking_water_(pct_population)",
     "SP.DYN.CBRT.IN":   "Birth_rate_(per 1000_people) ",
     "EN.GHG.CO2.PC.CE.AR5":   "t_CO2e_per_capita)",
+    "SP.POP.TOTL" : "population_total",
     "AG.LND.TOTL.K2":   "land_area_km2"
 }
 def url1_request (code, spaltenname):  #depending on database, viarble "dimension" may be necessary to add
@@ -168,4 +169,4 @@ print(
     .to_string()
 )
 
-df_merged.to_csv("output.csv", index="false")
+df_merged.to_csv("/home/ms/Coding/20260629_data worldbank_who/output.csv", index="false")
